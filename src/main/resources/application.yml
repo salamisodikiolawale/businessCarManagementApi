@@ -19,3 +19,9 @@ spring:
   sql:
     init:
       data-locations: classpath:schema.sql, classpath:data.sql
+  security:
+    user:
+      password: root
+      name: root
+    filter:
+      order: 10 #Permet d avoir 10 filter personnalisé qui seront prioritaires sur le filtre par defaut
