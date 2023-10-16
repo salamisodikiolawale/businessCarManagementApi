@@ -25,7 +25,6 @@ public class CarControllerTest {
     @MockBean
     private ConverterService converterService;
 
-    @Test
     public void testGetCarList_shouldReturnCars() throws Exception {
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/cars")

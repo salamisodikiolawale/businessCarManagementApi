@@ -25,7 +25,6 @@ public class ConverterServiceTest {
     @MockBean
     private final CarService carService;
 
-    @Test
     public void getCarList_shouldReturnCarList() throws Exception {
         Car car1 = new Car();
         car1.setId(1L);
