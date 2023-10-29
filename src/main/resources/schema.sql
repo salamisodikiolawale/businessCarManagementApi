@@ -69,5 +69,5 @@ CREATE OR REPLACE TABLE IF NOT EXISTS users(
                                                password VARCHAR NOT NULL ,
                                                role VARCHAR NOT NULL
 );
-INSERT INTO users (email, password, role) VALUES
-                                                                ('admin@gmail.com', '1234', 'admin');
+INSERT INTO users (email, password, role) VALUES('user@gmail.com', '$2a$10$VijxhnFhJN1djHjlv4L0peJzudXbfPZTnCht7Xfk3FJ6FNOOfuKve', 'user');
+
