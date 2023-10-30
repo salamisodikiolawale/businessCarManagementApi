@@ -27,8 +27,8 @@ public class Users {
     private String password;
     @Column(name = "role", nullable = false)
     private String role;
-//    @JsonIgnore //Pour éviter une boucle infini et ignorer le champs dans le retour json au front (donnée sensible)
-    @JsonManagedReference //Pour éviter une boucle infini et afficher le champs  dans le retour json au front (donnée sensible) , il faut ajouter //    @JsonBackReference dans Entity User
+    @JsonIgnore //Pour éviter une boucle infini et ignorer le champs dans le retour json au front (donnée sensible)
+//    @JsonManagedReference //Pour éviter une boucle infini et afficher le champs  dans le retour json au front (donnée sensible) , il faut ajouter //    @JsonBackReference dans Entity User
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private Set<Authority> authorities;
 }

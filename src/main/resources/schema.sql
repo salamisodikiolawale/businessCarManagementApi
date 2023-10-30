@@ -78,5 +78,6 @@ CREATE OR REPLACE TABLE IF NOT EXISTS authorities(
                                                FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
-INSERT INTO authorities (user_id, name) VALUES (1, 'VIEWDRIVERS');
-INSERT INTO authorities (user_id, name) VALUES (1, 'VIEWCARS');
+
+INSERT INTO authorities (user_id, name) VALUES (1, 'ROLE_USER');
+INSERT INTO authorities (user_id, name) VALUES (1, 'ROLE_ADMIN');

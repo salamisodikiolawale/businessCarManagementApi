@@ -1,6 +1,6 @@
 package com.bcm.businesscarmanagementapi.config;
 
-import com.bcm.businesscarmanagementapi.filter.CsrfCookieFilter;
+import com.bcm.businesscarmanagementapi.filter.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -32,12 +32,14 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import javax.sql.DataSource;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Collections;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
-@EnableWebSecurity
+//@EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
@@ -47,33 +49,35 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, MvcRequestMatcher.Builder mvc) throws Exception {
+
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
         requestHandler.setCsrfRequestAttributeName("_csrf");
         http
-                .securityContext(securityContext -> securityContext.requireExplicitSave(false)) //For disable default login spring security page and permet d éviter de s'authetifier achaque req grace l'utilisation de la session generer lors de la premiere connexion
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)) //For disable default login spring security page and permet d éviter de s'authetifier achaque req grace l'utilisation de la session generer lors de la premiere connexion
-                .cors(cors -> cors.configurationSource(new CorsConfigurationSource() {
+                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //Pour jwt
+                .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                        CorsConfiguration corsConfiguration = new CorsConfiguration();
-                        corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
-                        corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
-                        corsConfiguration.setAllowCredentials(true);
-                        corsConfiguration.setAllowedHeaders(Collections.singletonList("*"));
-                        corsConfiguration.setMaxAge(3600L);
-                        return corsConfiguration;
+                        CorsConfiguration config = new CorsConfiguration();
+                        config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
+                        config.setAllowedMethods(Collections.singletonList("*"));
+                        config.setAllowCredentials(true);
+                        config.setAllowedHeaders(Collections.singletonList("*"));
+                        config.setExposedHeaders(Arrays.asList("Authorization"));
+                        config.setMaxAge(3600L);
+                        return config;
                     }
                 }))
 
-//                .csrf(csrf -> {csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**"));})//For manage authorisation of h2-bd request(disable csrf for h2 only)
                 .csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers(mvc.pattern("api/register"), AntPathRequestMatcher.antMatcher("/h2-console/**"), mvc.pattern("api/contact"))
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
-                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
 
+                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new JWTTokenValidatorFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((requests) -> requests
-                        //Using authority
-                        .requestMatchers(mvc.pattern("api/drivers")).hasAuthority("VIEWDRIVERS")
-                        .requestMatchers(mvc.pattern("api/cars")).hasAnyAuthority("VIEWCARS", "VIEWDRIVERS")
+                        //Using Roles
+                        .requestMatchers(mvc.pattern("api/drivers")).hasRole("USER")
+                        .requestMatchers(mvc.pattern("api/cars")).hasAnyRole("ADMIN", "USER")
 
                         .requestMatchers(mvc.pattern("api/user")).authenticated()
 
@@ -83,7 +87,9 @@ public class SecurityConfig {
                                 AntPathRequestMatcher.antMatcher("/h2-console/**")
                         ).permitAll()
                 )
-                .headers(headers -> headers.frameOptions(frameOption -> frameOption.disable()));//For manage authorisation of h2-bd request;
+
+                .headers(headers -> headers.frameOptions(frameOption -> frameOption.disable()));
+
         http.formLogin(withDefaults());
         http.httpBasic(withDefaults());
         return http.build();

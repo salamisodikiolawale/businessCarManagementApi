@@ -34,10 +34,7 @@ public class CustomUserNamePwdAuhenticationProvider implements AuthenticationPro
         Optional<Users> user = usersRepository.findByEmail(username);
         if(user!=null){
             if(passwordEncoder.matches(pwd, user.get().getPassword())){
-//                List<GrantedAuthority> authorities = new ArrayList<>();
-//                authorities.add(new SimpleGrantedAuthority(user.get().getRole()));
                 return new UsernamePasswordAuthenticationToken(username, pwd, getGrantedAuthorities(user.get().getAuthorities()));
-//                return new UsernamePasswordAuthenticationToken(username, pwd, authorities);
             } else {
                 throw new BadCredentialsException("Invalid password");
             }
