@@ -64,10 +64,19 @@ INSERT INTO DRIVER_CAR (car_id, driver_id, associated_date) VALUES
 
 
 CREATE OR REPLACE TABLE IF NOT EXISTS users(
-                                               id BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+                                               user_id BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT,
                                                email VARCHAR NOT NULL UNIQUE ,
                                                password VARCHAR NOT NULL ,
                                                role VARCHAR NOT NULL
 );
 INSERT INTO users (email, password, role) VALUES('user@gmail.com', '$2a$10$VijxhnFhJN1djHjlv4L0peJzudXbfPZTnCht7Xfk3FJ6FNOOfuKve', 'user');
 
+CREATE OR REPLACE TABLE IF NOT EXISTS authorities(
+                                               id BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+                                               user_id BIGINT NOT NULL ,
+                                               name VARCHAR NOT NULL ,
+                                               FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+INSERT INTO authorities (user_id, name) VALUES (1, 'VIEWDRIVERS');
+INSERT INTO authorities (user_id, name) VALUES (1, 'VIEWCARS');

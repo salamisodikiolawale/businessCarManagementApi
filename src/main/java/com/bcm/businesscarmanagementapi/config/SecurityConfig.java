@@ -66,19 +66,23 @@ public class SecurityConfig {
                 }))
 
 //                .csrf(csrf -> {csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**"));})//For manage authorisation of h2-bd request(disable csrf for h2 only)
-                .csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers(mvc.pattern("api/register"), AntPathRequestMatcher.antMatcher("/h2-console/**"))
+                .csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers(mvc.pattern("api/register"), AntPathRequestMatcher.antMatcher("/h2-console/**"), mvc.pattern("api/contact"))
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
 
-                .authorizeHttpRequests((requests) -> {
-                    requests
-                            .requestMatchers(mvc.pattern("api/contact")).permitAll()
-                            .requestMatchers(mvc.pattern("api/register")).permitAll()
-                            .requestMatchers(mvc.pattern("api/**")).authenticated()
-                            .requestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")).permitAll();
+                .authorizeHttpRequests((requests) -> requests
+                        //Using authority
+                        .requestMatchers(mvc.pattern("api/drivers")).hasAuthority("VIEWDRIVERS")
+                        .requestMatchers(mvc.pattern("api/cars")).hasAnyAuthority("VIEWCARS", "VIEWDRIVERS")
 
-                    //For h2-db
-                })
+                        .requestMatchers(mvc.pattern("api/user")).authenticated()
+
+                        .requestMatchers(
+                                mvc.pattern("api/register"),
+                                mvc.pattern("api/contact"),
+                                AntPathRequestMatcher.antMatcher("/h2-console/**")
+                        ).permitAll()
+                )
                 .headers(headers -> headers.frameOptions(frameOption -> frameOption.disable()));//For manage authorisation of h2-bd request;
         http.formLogin(withDefaults());
         http.httpBasic(withDefaults());
