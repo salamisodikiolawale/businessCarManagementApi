@@ -22,5 +22,7 @@ spring:
     init:
       schema-locations: classpath:schema.sql
 logging:
-  level:
-    org.springframework.security: DEBUG
+#  level:
+#    org.springframework.security: DEBUG
+    web:
+      filterChainProxy: DEBUG

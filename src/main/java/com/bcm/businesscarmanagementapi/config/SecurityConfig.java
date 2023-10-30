@@ -1,6 +1,9 @@
 package com.bcm.businesscarmanagementapi.config;
 
+import com.bcm.businesscarmanagementapi.filter.AuthoritiesLoggingAfterFilter;
+import com.bcm.businesscarmanagementapi.filter.AuthoritiesLoggingAtFilter;
 import com.bcm.businesscarmanagementapi.filter.CsrfCookieFilter;
+import com.bcm.businesscarmanagementapi.filter.RequestValidationBeforeFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -65,15 +68,18 @@ public class SecurityConfig {
                     }
                 }))
 
-//                .csrf(csrf -> {csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**"));})//For manage authorisation of h2-bd request(disable csrf for h2 only)
                 .csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers(mvc.pattern("api/register"), AntPathRequestMatcher.antMatcher("/h2-console/**"), mvc.pattern("api/contact"))
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new RequestValidationBeforeFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(new AuthoritiesLoggingAfterFilter(), BasicAuthenticationFilter.class)
+                .addFilterAt(new AuthoritiesLoggingAtFilter(), BasicAuthenticationFilter.class)
 
                 .authorizeHttpRequests((requests) -> requests
-                        //Using authority
-                        .requestMatchers(mvc.pattern("api/drivers")).hasAuthority("VIEWDRIVERS")
-                        .requestMatchers(mvc.pattern("api/cars")).hasAnyAuthority("VIEWCARS", "VIEWDRIVERS")
+                        //Using Roles
+                        .requestMatchers(mvc.pattern("api/drivers")).hasRole("USER")
+                        .requestMatchers(mvc.pattern("api/cars")).hasAnyRole("ADMIN", "USER")
 
                         .requestMatchers(mvc.pattern("api/user")).authenticated()
 
@@ -83,7 +89,9 @@ public class SecurityConfig {
                                 AntPathRequestMatcher.antMatcher("/h2-console/**")
                         ).permitAll()
                 )
+
                 .headers(headers -> headers.frameOptions(frameOption -> frameOption.disable()));//For manage authorisation of h2-bd request;
+
         http.formLogin(withDefaults());
         http.httpBasic(withDefaults());
         return http.build();

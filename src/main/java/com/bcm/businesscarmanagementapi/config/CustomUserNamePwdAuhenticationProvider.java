@@ -32,12 +32,9 @@ public class CustomUserNamePwdAuhenticationProvider implements AuthenticationPro
         String username = authentication.getName();
         String pwd = authentication.getCredentials().toString();
         Optional<Users> user = usersRepository.findByEmail(username);
-        if(user!=null){
+        if(user.isPresent()){
             if(passwordEncoder.matches(pwd, user.get().getPassword())){
-//                List<GrantedAuthority> authorities = new ArrayList<>();
-//                authorities.add(new SimpleGrantedAuthority(user.get().getRole()));
                 return new UsernamePasswordAuthenticationToken(username, pwd, getGrantedAuthorities(user.get().getAuthorities()));
-//                return new UsernamePasswordAuthenticationToken(username, pwd, authorities);
             } else {
                 throw new BadCredentialsException("Invalid password");
             }
