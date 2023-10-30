@@ -18,7 +18,7 @@ public class Authority {
     private Long id;
     @Column(name = "name", nullable = false)
     private String name;
-    @JsonBackReference
+//    @JsonBackReference pus
     @ManyToOne
     @JoinColumn(name = "user_id")
     private Users user;

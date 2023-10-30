@@ -71,9 +71,12 @@ public class SecurityConfig {
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
 
                 .authorizeHttpRequests((requests) -> requests
-                        //Using authority
-                        .requestMatchers(mvc.pattern("api/drivers")).hasAuthority("VIEWDRIVERS")
-                        .requestMatchers(mvc.pattern("api/cars")).hasAnyAuthority("VIEWCARS", "VIEWDRIVERS")
+                        //Using authorities
+//                        .requestMatchers(mvc.pattern("api/drivers")).hasAuthority("VIEWDRIVERS")
+//                        .requestMatchers(mvc.pattern("api/cars")).hasAnyAuthority("VIEWCARS", "VIEWDRIVERS")
+                        //Using Roles
+                        .requestMatchers(mvc.pattern("api/drivers")).hasRole("USER")
+                        .requestMatchers(mvc.pattern("api/cars")).hasAnyRole("ADMIN", "USER")
 
                         .requestMatchers(mvc.pattern("api/user")).authenticated()
 
